@@ -1,0 +1,16 @@
+def win_list_all_process()
+	# http://rubyonwindows.blogspot.ca/2007/07/using-ruby-wmi-to-get-win32-process.html
+	# Function: Using Ruby & WMI to Get Win32 Process Information
+	# Author: David Mullet
+	# Date: Sunday, July 8, 2007
+	require 'win32ole'
+	wmi = WIN32OLE.connect("winmgmts://")
+	processes = wmi.ExecQuery("select * from win32_process")
+	for process in processes do
+		for property in process.Properties_ do
+			puts property.Name
+		end
+		break
+	end
+end
+win_list_all_process()
