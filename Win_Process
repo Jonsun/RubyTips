@@ -1,0 +1,46 @@
+<% =begin %>  <%
+Function: Ruby script to list process info in Windows
+Function: Below is a Ruby script to list process id and its command line in Windows.
+URL: unserializableone.blogspot.ca/2011/10/ruby-script-to-list-process-info-in.html 
+Author: Hung Huynh
+How to run it: ruby pid.rb <process-name>
+ie: ruby pid.rb java: will list java.exe and javaw.exe processes
+%> <% =end %>
+
+
+class ProcessInfo
+  attr_accessor :cmdLine, :pid
+   
+  def self.parseWmic(cmd)
+    result = `#{cmd}`
+    raise("Error: " + result) unless $? == 0
+    processes = []
+    pinfo = nil
+    result.split(/\r?\n/).each do |line|
+      next if line =~ /^\s*$/
+      if line =~ /CommandLine=(.*)/i
+        pinfo = ProcessInfo.new
+        pinfo.cmdLine = $1
+      elsif line =~ /ProcessId=(\d+)/i
+        pinfo.pid = $1
+        processes << pinfo unless pinfo.pid.to_i == $$.to_i
+      end
+    end
+    return processes
+  end
+   
+  def self.queryProcess(processName)
+    return self.parseWmic("wmic process where \"name like '" + processName +
+                "%'\" get ProcessID,Commandline /format:list")
+  end
+   
+  def self.queryJavaProcess
+    return self.queryProcess('java')
+  end 
+   
+  def to_s
+    @pid.to_s + " " + @cmdLine
+  end
+end
+ 
+puts ProcessInfo.queryProcess(ARGV[0])
